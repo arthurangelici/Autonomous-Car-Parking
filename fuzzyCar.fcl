@@ -1,0 +1,91 @@
+FUNCTION_BLOCK fuzzyCar// Define input variables
+VAR_INPUT				
+	posit : REAL;
+	orient : REAL;
+END_VAR
+
+// Define output variable
+VAR_OUTPUT				
+	av : REAL;
+END_VAR
+
+// Fuzzify input variable 'posit': {'CE-centro'}
+FUZZIFY posit
+        TERM LE := (0, 1) (100, 1) (350, 0);
+        TERM LC := (300, 0) (400, 1) (500, 0); 
+        TERM CE := (450, 0) (500, 1) (550,0); //Centro do estacionamento
+        TERM RC := (500, 0) (600, 1) (700, 0);
+        TERM RI := (650, 0) (900, 1) (1000, 1);
+END_FUZZIFY
+
+// Fuzzify input variable 'orient': { 'VE-vertical'}
+FUZZIFY orient			
+		TERM RB := (-91, 0) (-40, 1) (10, 0);
+        TERM RU := (-10, 0) (25, 1) (60, 0);
+        TERM RV := (50, 0) (70, 1) (90, 0);
+        TERM VE := (80, 0) (90, 1) (100, 0); // posit vertical 90 graus
+        TERM LV := (90, 0) (110, 1) (130, 0);
+        TERM LU := (125, 0) (160, 1) (195, 0);
+        TERM LB := (175, 0) (225, 1) (275, 0);
+END_FUZZIFY
+
+// Defzzzify output variable 'av: {'ZE-zero' }
+DEFUZZIFY av
+        TERM NB := (-30, 1) (-15, 0);
+        TERM NM := (-25, 0) (-15, 1) (-5, 0);
+        TERM NS := (-15, 0) (-7.5, 1) (0,0);			
+		TERM ZE := (-5, 0) (0, 1) (5,0); //Zero = av 0 graus
+        TERM PS := (0, 0) (7.5, 1) (15, 0);
+        TERM PM := (5, 0) (15, 1) (25, 0);
+        TERM PB := (15, 0) (30, 1);
+        
+        
+        
+	METHOD : COG;		// Use 'Center Of Gravity' defuzzification method
+	DEFAULT := 0;		// Default value is 0 (if no rule activates defuzzifier)
+END_DEFUZZIFY
+
+// Inference rules
+RULEBLOCK No1
+	AND : MIN;	// Use 'min' for 'and'
+	ACT : MIN;	// Use 'min' activation method
+	ACCU : MAX;	// Use 'max' accumulation method
+
+		RULE 1: IF posit IS LE AND orient IS RB THEN av IS PS;
+        RULE 2: IF posit IS LE AND orient IS RU THEN av IS NS;
+        RULE 3: IF posit IS LE AND orient IS RV THEN av IS NM;
+        RULE 4: IF posit IS LE AND orient IS VE THEN av IS NM;
+        RULE 5: IF posit IS LE AND orient IS LV THEN av IS NB;
+        RULE 6: IF posit IS LE AND orient IS LU THEN av IS NB;
+        RULE 7: IF posit IS LE AND orient IS LB THEN av IS NB;
+        RULE 8: IF posit IS LC AND orient IS RB THEN av IS PM;
+        RULE 9: IF posit IS LC AND orient IS RU THEN av IS PS;
+        RULE 10: IF posit IS LC AND orient IS RV THEN av IS NS;
+        RULE 11: IF posit IS LC AND orient IS VE THEN av IS NM;
+        RULE 12: IF posit IS LC AND orient IS LV THEN av IS NM;
+        RULE 13: IF posit IS LC AND orient IS LU THEN av IS NB;
+        RULE 14: IF posit IS LC AND orient IS LB THEN av IS NB;
+        RULE 15: IF posit IS CE AND orient IS RB THEN av IS PM;
+        RULE 16: IF posit IS CE AND orient IS RU THEN av IS PM;
+        RULE 17: IF posit IS CE AND orient IS RV THEN av IS PS;
+        RULE 18: IF posit IS CE AND orient IS VE THEN av IS ZE;
+        RULE 19: IF posit IS CE AND orient IS LV THEN av IS NS;
+        RULE 20: IF posit IS CE AND orient IS LU THEN av IS NM;
+        RULE 21: IF posit IS CE AND orient IS LB THEN av IS NM;
+        RULE 22: IF posit IS RC AND orient IS RB THEN av IS PB;
+        RULE 23: IF posit IS RC AND orient IS RU THEN av IS PB;
+        RULE 24: IF posit IS RC AND orient IS RV THEN av IS PM;
+        RULE 25: IF posit IS RC AND orient IS VE THEN av IS PM;
+        RULE 26: IF posit IS RC AND orient IS LV THEN av IS PS;
+        RULE 27: IF posit IS RC AND orient IS LU THEN av IS NS;
+        RULE 28: IF posit IS RC AND orient IS LB THEN av IS NM;
+        RULE 29: IF posit IS RI AND orient IS RB THEN av IS PB;
+        RULE 30: IF posit IS RI AND orient IS RU THEN av IS PB;
+        RULE 31: IF posit IS RI AND orient IS RV THEN av IS PB;
+        RULE 32: IF posit IS RI AND orient IS VE THEN av IS PM;
+        RULE 33: IF posit IS RI AND orient IS LV THEN av IS PM;
+        RULE 34: IF posit IS RI AND orient IS LU THEN av IS PS;
+        RULE 35: IF posit IS RI AND orient IS LB THEN av IS NS;
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK
